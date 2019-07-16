@@ -1,0 +1,57 @@
+@inherits Umbraco.Web.Mvc.UmbracoViewPage<UmbracoMemberHandling.Models.LoginModel>
+@using Umbraco.Web
+
+	@if (!Umbraco.MemberIsLoggedOn())
+	{
+		using (Html.BeginUmbracoForm("SubmitLogin", "Member", System.Web.Mvc.FormMethod.Post, new { id = "login" }))
+		{
+
+		@Html.AntiForgeryToken()
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-5" color ="red">
+			@Html.ValidationSummary()
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-lg-1">
+			@Html.LabelFor(m => m.Username)
+			@Html.TextBoxFor(m => m.Username, new { placeholder = "Username" })
+		</div>
+	</div>
+	&nbsp;
+	<div class="row">
+		<div class="col-lg-1">
+			@Html.LabelFor(m => m.Password)
+			@Html.PasswordFor(m => m.Password, new { placeholder = "Password" })
+		</div>
+	</div>
+	&nbsp;
+	<div class="row">
+		<div class="col-lg-3">
+			<button name="login" class="btn-primary" type="submit">Login</button>
+		</div>
+	</div>
+	&nbsp;
+	<div class="row">
+		<div class="col-lg-3">
+			<a href="URL HERE/forgotten-password/">Forgotten Password</a>
+		</div>
+	</div>
+	&nbsp;
+</div>
+		}
+	}
+	else
+	{
+	Html.RenderAction("RenderLogout", "Member");
+	}
+
+
+
+
+
+
+
+
