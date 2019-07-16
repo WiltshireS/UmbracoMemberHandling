@@ -1,0 +1,89 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Net.Mime;
+using System.Net.Mail;
+
+namespace UmbracoMemberHandling.Helpers
+{
+	public class EmailHelper
+	{
+		private const string EmailFromAddress = "REPLACE WITH SENDING EMAIL";
+
+		// A resetGUID is a timestamp of when the password was reset. It get's written to the member record and appended
+		// to the end of the password reset link provided to the member. When the link is clicked the two are compared to
+		// determine if it's genuine 
+		public void SendResetPasswordEmail(string memberEmail, string resetToken, bool newMember, string memberName)
+		{
+			//Send a reset email to member
+			// Create the email object first, then add the properties.
+			var myMessage = new MailMessage(EmailFromAddress, memberEmail);
+
+			//The body of the email, changes depending on new user flag 
+			string body;
+
+			// The subject of the email, changes depending on new user flag
+			string subject;
+
+			// The reset link 
+			string resetURL;
+			
+			myMessage.IsBodyHtml = true;
+
+			//Reset link
+			string baseURL = HttpContext.Current.Request.Url.AbsoluteUri.Replace(HttpContext.Current.Request.Url.AbsolutePath, string.Empty);
+
+			
+
+			if (newMember)
+			{
+				resetURL = baseURL + "/set-password?resetToken=" + resetToken;
+
+				//Subject
+				subject = "Welcome to the Procorre PEO Portal";
+
+				//HTML Message
+				body = string.Format(
+									"<h3>Setup Your Account</h3>" +
+									"<p>A new user account has been created for you<br/>" +
+									"<p>username: {1} </p>" +							
+									"<p><a href='{0}'>Click here to set your password</a></p>",
+									resetURL, memberName);
+			}
+			else
+			{
+				resetURL = baseURL + "/reset-password?resetToken=" + resetToken;
+
+				//Subject
+				subject = "Reset your password";
+
+				//HTML Message
+				body = string.Format(
+									"<h3>Reset Your Password</h3>" +
+									"<p>You have requested to reset your password<br/>" +
+									"If you have not requested to reset your password, simply ignore this email and delete it</p>" +
+									"<p><a href='{0}'>Reset your password</a></p>",
+									resetURL);
+			}
+
+			myMessage.Subject = subject;
+
+			myMessage.Body = body;
+
+			//PlainText Message
+			ContentType mimeType = new ContentType("text/html");
+			
+			// Add the alternate body to the message.
+			AlternateView alternate = AlternateView.CreateAlternateViewFromString(body, mimeType);
+
+			myMessage.AlternateViews.Add(alternate);
+
+			// Create an SMTP transport for sending email.
+			var smtpClient = new SmtpClient();
+
+			// Send the email.
+			smtpClient.Send(myMessage);
+		}
+	}
+}
